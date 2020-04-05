@@ -1,0 +1,56 @@
+server {
+  server_name  {{ inventory_hostname }};
+  listen   80;
+  listen [::]:80;
+  listen 443 ssl;
+  listen [::]:443 ssl;
+
+  ssl_certificate /etc/ssl/certs/mega_wildcard.pem;
+  ssl_certificate_key /etc/ssl/private/mega_wildcard.key;
+  ssl_session_cache shared:SSL:10m;
+  ssl_session_timeout 10m;
+  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+  ssl_ciphers "ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS:!AES256";
+  ssl_prefer_server_ciphers on;
+  ssl_dhparam /etc/nginx/ssl/dhp-4096.pem;
+
+  access_log  /var/log/nginx/greenlight_access.log;
+
+  # Redirect server error pages to the static page /50x.html
+  #
+  error_page   500 502 503 504  /50x.html;
+  location = /50x.html {
+          root   /var/www/nginx-default;
+  }
+
+  location = / {
+    return 307 /b;
+  }
+
+  # Routes requests to Greenlight based on the '/b' prefix.
+  # Use this file to route '/b' paths on your BigBlueButton server
+  # to the Greenlight application. If you are using a different
+  # subpath, you should change it here.
+
+  location /b {
+    proxy_pass          http://127.0.0.1:5000;
+    proxy_set_header    Host              $host;
+    proxy_set_header    X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header    X-Forwarded-Proto $scheme;
+    proxy_http_version  1.1;
+  }
+
+  location /b/cable {
+    proxy_pass          http://127.0.0.1:5000;
+    proxy_set_header    Host              $host;
+    proxy_set_header    X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header    X-Forwarded-Proto $scheme;
+    proxy_set_header    Upgrade           $http_upgrade;
+    proxy_set_header    Connection        "Upgrade";
+    proxy_http_version  1.1;
+    proxy_read_timeout  6h;
+    proxy_send_timeout  6h;
+    client_body_timeout 6h;
+    send_timeout        6h;
+  }
+}

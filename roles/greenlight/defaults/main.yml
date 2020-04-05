@@ -1,0 +1,22 @@
+---
+# openssk rand -hex 64
+#greenlight_secret_key:
+
+greenlight_db_docker: yes
+# only if greenlight_db_docker is false
+#greenlight_db_host:
+greenlight_db_user: greenlight
+greenlight_db_pass: greenlight
+greenlight_db_name: f26b21223835cd8a
+greenlight_logdir: /var/log/greenlight
+
+greenlight_ldap_server: ''
+greenlight_ldap_port: ''
+greenlight_ldap_method: ''
+greenlight_ldap_uid: ''
+greenlight_ldap_base: ''
+greenlight_ldap_bind_dn: ''
+greenlight_ldap_bind_pwd: ''
+greenlight_ldap_role_file: ''
+
+greenlight_report_url: https://github.com/bigbluebutton/greenlight/issues/new

@@ -1,0 +1,40 @@
+---
+- name: Create greenlight directory
+  file:
+    state: directory
+    path: /root/greenlight
+
+- name: Deploy docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: /root/greenlight/docker-compose.yml
+  notify: restart greenlight
+
+- name: Deploy greenlight environment file
+  template:
+    src: env.j2
+    dest: /root/greenlight/.env
+  notify: restart greenlight
+
+- name: Launch docker-compose
+  docker_compose:
+    project_src: /root/greenlight
+
+- name: Install nginx
+  apt:
+    name: nginx
+
+- file:
+    state: directory
+    path: /etc/nginx/ssl
+
+- name: Generating dhparam (It takes some time !)
+  shell: openssl dhparam -out /etc/nginx/ssl/dhp-4096.pem 4096
+  args:
+    creates: /etc/nginx/ssl/dhp-4096.pem
+
+- name: Deploy greenlight vhost
+  template:
+    src: greenlight.conf.j2
+    dest: /etc/nginx/sites-enabled/greenlight.conf
+  notify: restart nginx

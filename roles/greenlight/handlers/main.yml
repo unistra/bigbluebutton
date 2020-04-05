@@ -1,0 +1,9 @@
+---
+- name: restart greenlight
+  docker_compose:
+    project_src: /root/greenlight
+
+- name: restart nginx
+  service:
+    name: nginx
+    state: restarted
