@@ -21,6 +21,10 @@
   docker_compose:
     project_src: /root
 
+- name: Initialize Scalelite database
+  when: scalelite_db_init
+  command: docker exec -it scalelite-api bin/rake db:setup
+
 - name: Retrieve bigbluebutton secret keys
   delegate_to: "{{ item }}"
   shell: 'bbb-conf --secret | grep -o "Secret:.*$" | grep -o "[^ ]*$"'

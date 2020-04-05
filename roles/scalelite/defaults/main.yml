@@ -11,6 +11,7 @@ scalelite_db_docker: yes
 scalelite_db_user: scalelite
 scalelite_db_pass: scalelite
 scalelite_db_name: scalelite
+scalelite_db_init: no
 
 scalelite_redis_docker: yes
 # only if scalelite_db_redis is false
