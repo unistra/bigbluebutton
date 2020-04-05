@@ -1,0 +1,11 @@
+# vim temporary files
+*.swp
+
+# Ansible retry files
+*.retry
+
+# Python bytecode
+*.pyc
+
+# vaults
+vault*
