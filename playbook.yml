@@ -1,0 +1,16 @@
+#!/usr/bin/env ansible-playbook
+---
+- hosts: all
+  remote_user: root
+  gather_facts: no
+  tasks:
+  - name: Provision guests
+    when: provision|default('no')|bool
+    block:
+    - name: Deploy OpenNebula guests
+      import_role: { name: opennebula }
+      tags: one
+
+    - name: Deploy base tools
+      import_role: { name: base-dnum }
+      tags: base

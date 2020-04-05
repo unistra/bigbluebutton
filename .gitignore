@@ -9,3 +9,19 @@
 
 # vaults
 vault*
+
+# third-party roles
+roles/base-dnum/
+roles/bunker/
+roles/epel/
+roles/firewall/
+roles/inventory/
+roles/localmail/
+roles/opennebula/
+roles/rhn/
+roles/selinux/
+roles/supervision/
+roles/time/
+roles/tina/
+roles/tools/
+roles/upgrade/

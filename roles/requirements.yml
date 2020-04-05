@@ -1,0 +1,10 @@
+---
+- name: opennebula
+  scm: git
+  src: git@git.unistra.fr:di/ansible/roles/provisioning/opennebula.git
+  version: master
+
+- name: base-dnum
+  scm: git
+  src: git@git.unistra.fr:di/ansible/roles/base/base-dnum.git
+  version: master
