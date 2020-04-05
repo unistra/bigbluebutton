@@ -1,0 +1,26 @@
+---
+- name: Install NFS dependencies
+  apt:
+    name: nfs-common
+
+- name: Create directory
+  file:
+    state: directory
+    path: "{{ bbb_datadir }}"
+
+- name: Ensure NFS volume is mounted
+  mount:
+    src: "{{ bbb_nfs_vol }}"
+    path: "{{ bbb_datadir }}"
+    fstype: nfs
+    opts: nfsvers=3,rw,auto,hard,intr
+    state: mounted
+
+- name: Set rights on NFS directory
+  file:
+    path: "{{ bbb_datadir }}"
+    owner: "998"
+    group: "998"
+    recurse: yes
+  # chown fail on .snapshot directory but do the job for other directories
+  ignore_errors: yes
