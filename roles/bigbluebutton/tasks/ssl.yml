@@ -1,0 +1,78 @@
+---
+- name: Creating Nginx ssl dir
+  file:
+    path: /etc/nginx/ssl
+    state: directory
+    mode: '0755'
+
+- name: Generating dhparam (It takes some time !)
+  shell: openssl dhparam -out /etc/nginx/ssl/dhp-4096.pem 4096
+  args:
+    creates: /etc/nginx/ssl/dhp-4096.pem
+
+- name: Configuring Nginx for SSL
+  template:
+    src: bigbluebutton.j2
+    dest: /etc/nginx/sites-available/bigbluebutton
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+    force: yes
+
+- name: Restart Nginx
+  service:
+    name: nginx
+    state: restarted
+
+- name: Modifying Freeswitch for SSL (https)
+  replace:
+    path: /etc/bigbluebutton/nginx/sip.nginx
+    regexp: '^        proxy_pass http\:'
+    replace: '        proxy_pass https:'
+  notify: restart bigbluebutton
+  tags: debug
+
+- name: Modifying Freeswitch for SSL (port)
+  replace:
+    path: /etc/bigbluebutton/nginx/sip.nginx
+    regexp: '5066\;$'
+    replace: '7443;'
+
+- name: Modifying bigbluebutton.properties
+  replace:
+    path: /usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties
+    regexp: 'web\.serverURL=http\:'
+    replace: 'web.serverURL=https:'
+
+- name: Modifying screenshare.properties
+  replace:
+    path: /usr/share/red5/webapps/screenshare/WEB-INF/screenshare.properties
+    regexp: 'http\:'
+    replace: 'https:'
+
+- name: Modifying config.xml
+  shell: sed -e 's|http://|https://|g' -i /var/www/bigbluebutton/client/conf/config.xml
+  notify: restart bigbluebutton
+
+- name: Modifying meteor config file (ws)
+  replace:
+    path: /usr/share/meteor/bundle/programs/server/assets/app/config/settings.yml
+    regexp: 'ws\:'
+    replace: 'wss:'
+  notify: restart bigbluebutton
+
+- name: Modifying meteor config file (http)
+  replace:
+    path: /usr/share/meteor/bundle/programs/server/assets/app/config/settings.yml
+    regexp: 'http\:'
+    replace: 'https:'
+  notify: restart bigbluebutton
+
+- name: Modifying recordings creation yml file
+  lineinfile:
+    path: /usr/local/bigbluebutton/core/scripts/bigbluebutton.yml
+    regexp: 'playback_protocol.*$'
+    line: 'playback_protocol: https'
+    state: present
+  notify: restart bigbluebutton

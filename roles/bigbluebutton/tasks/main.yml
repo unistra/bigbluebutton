@@ -1,0 +1,109 @@
+---
+- set_fact:
+    desired_hostname: "{{ inventory_hostname }}"
+
+- name: Vars
+  fail:
+    msg: Please give each node a desired_hostname, which is its FQDN (from which BBB wil be accessed)
+  when: desired_hostname is not defined
+
+- name: Dbg
+  debug:
+    var: desired_hostname
+
+- name: Installing Prerequisites
+  apt:
+    update_cache: yes
+    name:
+      - net-tools
+      - language-pack-en
+      - lsb-release
+      - python3
+      - python3-apt
+      - python-apt
+      - haveged
+      - dbus
+      - wget
+    state: present
+    force_apt_get: yes
+
+- name: Changing locale
+  locale_gen:
+    name: en_US.UTF-8
+    state: present
+
+- name: Updating
+  apt:
+    upgrade: safe
+
+- name: Configure firewall
+  when: bigbluebutton_configure_firewall|bool
+  block:
+  - name: Opening tcp ports
+    ufw:
+      rule: allow
+      port: "{{ item }}"
+      proto: tcp
+    with_items:
+      - 443
+      - 80
+      - 7443
+      - 389
+      - 22
+      - 6556
+
+  - name: Opening UDP ports
+    ufw:
+      rule: allow
+      port: 16384:32768
+      proto: udp
+      state: reloaded
+
+  - name: Enabling UFW
+    ufw:
+      state: enabled
+      default: deny
+
+- name: Checking we have multiverse enabled
+  apt_repository:
+    repo: deb http://archive.ubuntu.com/ubuntu xenial multiverse
+    state: present
+  tags:
+    - never
+
+- name: Message
+  debug:
+    msg: >
+      Ready to run wget -qO- https://ubuntu.bigbluebutton.org/bbb-install.sh | bash -s -- -v xenial-220
+      This takes around 15 mns
+
+- name: Running Install script
+  shell: wget -qO- https://ubuntu.bigbluebutton.org/bbb-install.sh | bash -s -- -v xenial-220
+  become: yes
+
+- name: Installing dependencies
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg2
+      - software-properties-common
+    state: present
+
+- name: Running setip
+  shell: "bbb-conf --setip {{ desired_hostname }}"
+
+- name: Configure recording directories
+  lineinfile:
+    regexp: '^{{ item.key }}='
+    line: "{{item.key }}={{ item.value }}"
+    path: /usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties
+    state: present
+  loop:
+    - { key: 'publishedDir', value: '/var/bbb/published' }
+    - { key: 'unpublishedDir', value: '/var/bbb/unpublished' }
+    - { key: 'captionsDir', value: '/var/bbb/captions' }
+  notify: restart bigbluebutton
+
+- include_tasks: ssl.yml

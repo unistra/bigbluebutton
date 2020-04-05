@@ -20,3 +20,15 @@
     when: nfs_enabled|bool
     import_role: { name: nfs }
     tags: nfs
+
+- hosts: bigbluebutton
+  remote_user: root
+  gather_facts: yes
+  tasks:
+  - name: Deploy certificates
+    import_role: { name: certificates }
+    tags: certs
+
+  - name: Deploy Big Blue Button
+    import_role: { name: bigbluebutton }
+    tags: bigbluebutton

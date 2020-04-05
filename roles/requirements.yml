@@ -8,3 +8,8 @@
   scm: git
   src: git@git.unistra.fr:di/ansible/roles/base/base-dnum.git
   version: master
+
+- name: certificates
+  scm: git
+  src: git@git.unistra.fr:di/ansible/roles/certificates.git
+  version: dev
