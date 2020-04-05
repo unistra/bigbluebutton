@@ -13,3 +13,9 @@
   scm: git
   src: git@git.unistra.fr:di/ansible/roles/certificates.git
   version: dev
+
+- name: geerlingguy.docker
+- name: docker
+  scm: git
+  src: git@git.unistra.fr:di/ansible/roles/docker.git
+  version: master

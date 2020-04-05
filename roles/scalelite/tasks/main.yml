@@ -1,0 +1,47 @@
+---
+- name: Check for required variables
+  loop:
+  - scalelite_secret_key
+  - scalelite_loadbalancer_key
+  when: item not in vars
+  fail:
+    msg: "missing required variable: {{ item }}"
+
+- name: Create spool directory
+  file:
+    state: directory
+    path: "{{ scalelite_datadir }}/spool"
+
+- name: Generate docker-compose.yml file
+  template:
+    src: docker-compose.yml.j2
+    dest: /root/docker-compose.yml
+
+- name: Launch docker-compose
+  docker_compose:
+    project_src: /root
+
+- name: Retrieve bigbluebutton secret keys
+  delegate_to: "{{ item }}"
+  shell: 'bbb-conf --secret | grep -o "Secret:.*$" | grep -o "[^ ]*$"'
+  register: secret_keys
+  loop: "{{ groups.bigbluebutton }}"
+
+- name: Retrieve servers status
+  loop: "{{ groups.bigbluebutton }}"
+  shell: >-
+    docker exec scalelite-api
+    ./bin/rake servers
+    | grep -o "{{ item }}"
+  ignore_errors: yes
+  register: servers
+
+- name: Register the host to scalelite
+  loop: "{{ secret_keys.results|flatten(levels=1) }}"
+  loop_control:
+    index_var: index
+  when: servers.results[index].rc != 0
+  include_tasks: register.yml
+  vars:
+    hostname: "{{ item.item }}"
+    key: "{{ item.stdout }}"

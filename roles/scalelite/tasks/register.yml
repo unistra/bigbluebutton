@@ -1,0 +1,12 @@
+---
+- name: Register the host to scalelite
+  shell: >-
+    docker exec scalelite-api 
+    ./bin/rake servers:add[https://{{ hostname }}/bigbluebutton/api,{{ key }}]
+    | grep -o "id:.*$" | grep -o "[^ ]*$"
+  register: instance_id
+
+- name: Enable hosts to scalelite
+  shell: >-
+    docker exec scalelite-api 
+    ./bin/rake servers:enable[{{ instance_id.stdout }}]

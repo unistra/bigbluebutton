@@ -32,3 +32,19 @@
   - name: Deploy Big Blue Button
     import_role: { name: bigbluebutton }
     tags: bigbluebutton
+
+- hosts: scalelite
+  remote_user: root
+  gather_facts: yes
+  tasks:
+  - name: Deploy certificates
+    import_role: { name: certificates }
+    tags: certs
+
+  - name: Install Docker
+    import_role: { name: docker }
+    tags: docker
+
+  - name: Deploy scalelite load balancer
+    import_role: { name: scalelite }
+    tags: scalelite

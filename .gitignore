@@ -26,3 +26,5 @@ roles/tina/
 roles/tools/
 roles/upgrade/
 roles/certificates
+roles/geerlingguy.docker
+roles/docker
