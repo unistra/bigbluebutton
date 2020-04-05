@@ -2,6 +2,11 @@ server {
   server_name  {{ inventory_hostname }};
   listen   80;
   listen [::]:80;
+
+  return 301 https://$host$request_uri;
+}
+
+server {
   listen 443 ssl;
   listen [::]:443 ssl;
 
