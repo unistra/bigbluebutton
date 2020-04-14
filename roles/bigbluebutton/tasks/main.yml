@@ -94,16 +94,13 @@
 - name: Running setip
   shell: "bbb-conf --setip {{ desired_hostname }}"
 
-- name: Configure recording directories
+- name: Configure Big Blue Button
   lineinfile:
     regexp: '^{{ item.key }}='
     line: "{{item.key }}={{ item.value }}"
     path: /usr/share/bbb-web/WEB-INF/classes/bigbluebutton.properties
     state: present
-  loop:
-    - { key: 'publishedDir', value: '/var/bbb/published' }
-    - { key: 'unpublishedDir', value: '/var/bbb/unpublished' }
-    - { key: 'captionsDir', value: '/var/bbb/captions' }
+  loop: "{{ bigbluebutton_config|dict2items }}"
   notify: restart bigbluebutton
 
 - include_tasks: ssl.yml

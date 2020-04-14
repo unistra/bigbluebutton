@@ -1,2 +1,4 @@
 ---
 bigbluebutton_configure_firewall: no
+
+bigbluebutton_config: {}
