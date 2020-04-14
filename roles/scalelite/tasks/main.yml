@@ -7,10 +7,71 @@
   fail:
     msg: "missing required variable: {{ item }}"
 
+- name: Create scalelite group
+  loop: "{{ groups.bigbluebutton }}"
+  delegate_to: "{{ item }}"
+  group:
+    name: scalelite-spool
+    gid: 2000
+
+- name: Add bigbluebutton user to group
+  loop: "{{ groups.bigbluebutton }}"
+  delegate_to: "{{ item }}"
+  user:
+    name: bigbluebutton
+    groups: scalelite-spool
+    append: yes
+
 - name: Create spool directory
   file:
     state: directory
-    path: "{{ scalelite_datadir }}/spool"
+    path: "{{ scalelite_datadir }}/var/bigbluebutton/spool"
+    owner: 1000
+    group: 2000
+    mode: '0775'
+    recurse: yes
+
+- name: Create working directory
+  file:
+    state: directory
+    path: "{{ scalelite_datadir }}/var/bigbluebutton/recording/scalelite"
+    owner: 1000
+    group: 2000
+    mode: '0775'
+    recurse: yes
+
+- name: Create published directory
+  file:
+    state: directory
+    path: "{{ scalelite_datadir }}/var/bigbluebutton/published"
+    owner: 1000
+    group: 1000
+    mode: '0775'
+    recurse: yes
+
+- name: Create unpublished directory
+  file:
+    state: directory
+    path: "{{ scalelite_datadir }}/var/bigbluebutton/unpublished"
+    owner: 1000
+    group: 1000
+    mode: '0775'
+    recurse: yes
+
+# https://github.com/blindsidenetworks/scalelite/blob/master/bigbluebutton/README.md
+- name: Deploy scalelite scalelite_post_publish.rb script
+  loop: "{{ groups.bigbluebutton }}"
+  delegate_to: "{{ item }}"
+  copy:
+    src: scalelite_post_publish.rb
+    dest: /usr/local/bigbluebutton/core/scripts/post_publish
+
+- name: Deploy scalelite scalelite.yml file
+  loop: "{{ groups.bigbluebutton }}"
+  delegate_to: "{{ item }}"
+  template:
+    src: scalelite.yml.j2
+    dest: /usr/local/bigbluebutton/core/scripts/scalelite.yml
 
 - name: Generate docker-compose.yml file
   template:

@@ -1,5 +1,6 @@
 ---
-scalelite_datadir: /var/bbb
+scalelite_datadir: /mnt/scalelite-recordings
+
 # openssl rand -hex 64
 #scalelite_secret_key:
 # openssl rand -hex 32

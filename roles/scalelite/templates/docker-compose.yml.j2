@@ -44,7 +44,7 @@ services:
 {% endif %}
 {% endif %}
     volumes:
-    - "{{ scalelite_datadir }}:/var/bigbluebutton"
+    - "{{ scalelite_datadir }}/var/bigbluebutton:/var/bigbluebutton"
     environment: &ENVS
       URL_HOST: "{{ inventory_hostname }}"
       SECRET_KEY_BASE: {{ scalelite_secret_key }}
@@ -64,7 +64,7 @@ services:
     - 80:80
     - 443:443
     volumes:
-    - "{{ scalelite_datadir }}/published:/var/bbb/published:ro"
+    - "{{ scalelite_datadir }}/var/bigbluebutton/published:/var/bigbluebutton/published:ro"
     - /etc/ssl/certs/mega_wildcard.pem:/etc/nginx/ssl/live/{{ inventory_hostname }}/fullchain.pem
     - /etc/ssl/private/mega_wildcard.key:/etc/nginx/ssl/live/{{ inventory_hostname }}/privkey.pem
     environment:
@@ -88,5 +88,5 @@ services:
     depends_on: *DEPENDS
 {% endif %}
     volumes:
-    - "{{ scalelite_datadir }}:/var/bigbluebutton"
+    - "{{ scalelite_datadir }}/var/bigbluebutton:/var/bigbluebutton"
     environment: *ENVS
