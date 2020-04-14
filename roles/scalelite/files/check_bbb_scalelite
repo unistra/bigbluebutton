@@ -1,0 +1,56 @@
+#! /usr/bin/python
+# coding: utf-8
+
+import os
+import sys
+
+def main():
+    all_ok = True
+    output = ""
+    output_status = ""
+    list_servers = []
+    list_status = []
+    
+    with os.popen('docker exec scalelite-api ./bin/rake servers') as f:
+        for line in f:
+            list_servers.append(line)
+    # print(list_servers)
+    nb_line = len(list_servers)
+    nb_server = nb_line / 6
+    for i in range(1, int(nb_server)+1):
+        server = list_servers[i * 6 - 5].split(
+            ':')[2].split('/')[2].strip().split(".")[0]
+        online = list_servers[i * 6 - 1].strip()
+        output_temp = "%s => %s " % (server, online)
+        output = output + output_temp
+        if online != "online":
+            all_ok = False
+    output = output.strip()
+
+    with os.popen('docker exec -e COLUMNS="200" -e LINES="50" scalelite-api ./bin/rake status') as f:
+        for line in f:
+            list_status.append(line)
+    #print(list_status)
+    for i in range(1, len(list_status)):
+    #for index, line in enumerate(list_status):
+        line = list_status[i]
+        line_array = [ x for x in line.split(' ') if x]
+        #print(line_array)
+        server = line_array[0].split('.')[0]
+        nb_meeting = line_array[3]
+        nb_users = line_array[4]
+        nb_video = line_array[6]
+        #print(server)
+        output_status = output_status + (
+            " Nb_meetings_" + server + "=" + nb_meeting + " Nb_users_" +
+            server + "=" + nb_users + " Nb_videos_" + server + "=" + nb_video)
+        #print(output_status)
+        output_total = output + "|" + output_status
+    if not all_ok:
+        print("CRITICAL - %s" % output_total)
+    print("OK - %s" % output_total)
+
+
+if __name__ == '__main__':
+    main()
+

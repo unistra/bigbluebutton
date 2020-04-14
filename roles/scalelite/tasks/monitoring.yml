@@ -1,0 +1,56 @@
+---
+- name: Deploy NRPE script
+  copy:
+    src: files/check_bbb_scalelite
+    dest: /usr/lib/nagios/plugins/check_bbb_scalelite
+    mode: +x
+  notify: restart nrpe
+
+- name: Deploy NRPE conf
+  copy:
+    src: nrpe-scalelite.conf
+    dest: /etc/nagios/nrpe.d/nrpe-scalelite.cfg
+  notify: restart nrpe
+
+- name: Ensure Nagios user can run docker commands
+  user:
+    name: nagios
+    groups: docker
+    append: yes
+
+- name: Add Nagios to sudo /usr/lib/docker
+  lineinfile:
+    path: /etc/sudoers.d/nagios
+    line: 'nagios ALL=(ALL) NOPASSWD: /usr/lib/docker *'
+    state: present
+    mode: 0440
+    create: yes
+    validate: 'visudo -cf %s'
+
+#- name: Set includedir in sudoers
+#  lineinfile:
+#    dest: /etc/sudoers
+#    regexp: "#includedir\\s+/etc/sudoers.d"
+#    line: "includedir /etc/sudoers.d"
+
+## For prometheus-bigbluebutton-exporter on bbb backends
+#- name: Install Docker
+#  import_role: { name: docker }
+#  tags: [prometheus, docker]
+#
+#- name: Retrieve bbb secret
+#  tags: prometheus
+#  shell: 'bbb-conf --secret | grep -o "Secret:.*$" | grep -o "[^ ]*$"'
+#  register: bbb_secret
+#
+## docker container run --rm -p 9688:9688 bigbluebutton-exporter --bbb.api=https://yoursite.com/bigbluebutton/api/ --bbb.secret=secret
+#- name: Launch Prometheus exporter
+#  tags: prometheus
+#  docker_container:
+#    name: prometheus-bigbluebutton-exporter
+#    image: bigbluebutton-exporter
+#    exposed_ports:
+#    - 9688:9688
+#    command:
+#    - "--bbb.api=https://{{ inventory_hostname }}/bigbluebutton/api/ --bbb.secret={{ bbb_secret }}"
+#
