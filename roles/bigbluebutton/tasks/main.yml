@@ -103,4 +103,25 @@
   loop: "{{ bigbluebutton_config|dict2items }}"
   notify: restart bigbluebutton
 
+- name: Manage camera profiles
+  when: bigbluebutton_camera_profiles is defined
+  block:
+  - name: Generate yq script for camera profile
+    copy:
+      dest: /var/cache/yq_cameraProfiles.yml
+      content: |
+        - command: update
+          path: public.kurento.cameraProfiles
+          value:
+          {{ bigbluebutton_camera_profiles|to_nice_yaml|indent(2) }}
+    # notify is here as command module always change
+    notify: restart bigbluebutton
+
+  - name: Set camera profiles
+    command: >-
+      yq w
+      -i
+      -s /var/cache/yq_cameraProfiles.yml
+      /usr/share/meteor/bundle/programs/server/assets/app/config/settings.yml
+
 - include_tasks: ssl.yml
