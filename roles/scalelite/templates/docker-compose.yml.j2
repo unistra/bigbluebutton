@@ -49,7 +49,7 @@ services:
       URL_HOST: "{{ inventory_hostname }}"
       SECRET_KEY_BASE: {{ scalelite_secret_key }}
       LOADBALANCER_SECRET: {{ scalelite_loadbalancer_key }}
-      DATABASE_URL: "postgresql://{{ scalelite_db_user }}:{{ scalelite_db_pass }}@{{ 'database' if scalelite_db_docker else scalelite_db_host}}"
+      DATABASE_URL: "postgresql://{{ scalelite_db_user }}:{{ scalelite_db_pass }}@{{ 'database' if scalelite_db_docker else scalelite_db_host }}:5432/{{ scalelite_db_name }}"
       REDIS_URL: redis://{{ 'redis' if scalelite_redis_docker else scalelite_redis_host }}
       RAILS_LOG_TO_STDOUT: 'true'
 
