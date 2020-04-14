@@ -1,0 +1,21 @@
+---
+# For prometheus-bigbluebutton-exporter on bbb backends
+- name: Install Docker
+  import_role: { name: docker }
+
+- name: Retrieve bbb secret
+  tags: prometheus
+  shell: 'bbb-conf --secret | grep -o "Secret:.*$" | grep -o "[^ ]*$"'
+  register: bbb_secret
+
+
+- name: Generate docker-compose.yml file for prometheus
+  tags: prometheus
+  template:
+    src: docker-compose.yml.j2
+    dest: /root/docker-compose.yml
+
+- name: Launch Prometheus exporter
+  tags: prometheus
+  docker_compose:
+    project_src: /root

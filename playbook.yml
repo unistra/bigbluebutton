@@ -33,6 +33,10 @@
     import_role: { name: bigbluebutton }
     tags: bigbluebutton
 
+  - name: Deploy monitoring
+    import_role: { name: bigbluebutton, tasks_from: monitoring }
+    tags: monitoring
+
 - hosts: scalelite
   remote_user: root
   gather_facts: yes

@@ -1,0 +1,11 @@
+version: '2'
+services:
+  bbb-exporter:
+    container_name: "bbb-exporter"
+    image: greenstatic/bigbluebutton-exporter
+    ports:
+      - 9688:9688
+    environment:
+      - "API_BASE_URL=https://{{ inventory_hostname }}/bigbluebutton/api/"
+      - "API_SECRET={{ bbb_secret.stdout }}"
+
