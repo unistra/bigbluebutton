@@ -103,6 +103,12 @@
   loop: "{{ bigbluebutton_config|dict2items }}"
   notify: restart bigbluebutton
 
+- name: Change default presentation
+  copy:
+    src: files/default.pdf
+    dest: /var/www/bigbluebutton-default/default.pdf
+    mode: +r
+
 - name: Manage camera profiles
   when: bigbluebutton_camera_profiles is defined
   block:
