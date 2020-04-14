@@ -1,4 +1,8 @@
 ---
+- name: Ensure facts are present
+  when: ansible_distribution is not defined
+  setup:
+
 - name: Install NFS dependencies
   apt:
     name: nfs-common
@@ -7,6 +11,53 @@
   file:
     state: directory
     path: "{{ bbb_datadir }}"
+
+- name: Configure storage interface
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '16'
+  block:
+  - name: Deploy main network configuration
+    copy:
+      dest: /etc/network/interfaces
+      content: |
+        # The loopback network interface
+        auto lo
+        iface lo inet loopback
+
+        source /etc/network/interfaces.d/*
+
+  - name: Deploy interfaces configuration (DHCP)
+    loop: [eth0, eth1]
+    copy:
+      dest: /etc/network/interfaces.d/{{ item }}
+      content: |
+        auto {{ item }}
+        iface {{ item }} inet dhcp
+    register: netconf
+
+  - name: Reboot system
+    when: netconf.changed
+    shell: 'nohup bash -c "sleep 2s && reboot" &'
+
+  - name: Wait for the host to be up
+    when: netconf.changed
+    wait_for_connection:
+      delay: 30
+      timeout: 300
+
+- name: Configure storage interface
+  when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 18
+  block:
+  - name: Configure Netplan
+    blockinfile:
+      path: /etc/netplan/01-netcfg.yaml
+      insertafter: EOF
+      block: |
+        {% raw %}
+            ens4:
+              dhcp4: yes
+        {% endraw %}
+    notify: netplan apply
+- meta: flush_handlers
 
 - name: Ensure NFS volume is mounted
   mount:

@@ -1,2 +1,3 @@
 ---
-# handlers file for roles/nfs
+- name: netplan apply
+  command: netplan apply
