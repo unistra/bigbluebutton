@@ -83,8 +83,11 @@
     project_src: /root
 
 - name: Initialize Scalelite database
-  when: scalelite_db_init
-  command: docker exec -it scalelite-api bin/rake db:setup
+  when: scalelite_db_init|bool
+  # https://stackoverflow.com/questions/10301794/difference-between-rake-dbmigrate-dbreset-and-dbschemaload
+  command: >-
+    docker exec -it scalelite-api bin/rake
+    {% if scalelite_db_docker %}db:create{% endif %} db:schema:load db:seed
 
 - name: Retrieve bigbluebutton secret keys
   delegate_to: "{{ item }}"
