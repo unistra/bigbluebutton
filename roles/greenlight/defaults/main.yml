@@ -2,6 +2,8 @@
 # openssk rand -hex 64
 #greenlight_secret_key:
 
+greenlight_docker_image: bigbluebutton/greenlight:v2
+
 greenlight_db_docker: yes
 # only if greenlight_db_docker is false
 #greenlight_db_host:
