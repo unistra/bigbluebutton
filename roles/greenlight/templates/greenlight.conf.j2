@@ -1,5 +1,5 @@
 server {
-  server_name  {{ inventory_hostname }};
+  server_name  {{ inventory_hostname }} {{ greenlight_aliases|join(' ') }};
   listen   80;
   listen [::]:80;
 
@@ -7,6 +7,8 @@ server {
 }
 
 server {
+  server_name  {{ inventory_hostname }} {{ greenlight_aliases|join(' ') }};
+
   listen 443 ssl;
   listen [::]:443 ssl;
 
