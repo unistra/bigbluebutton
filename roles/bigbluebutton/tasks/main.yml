@@ -2,16 +2,7 @@
 - set_fact:
     desired_hostname: "{{ inventory_hostname }}"
 
-- name: Vars
-  fail:
-    msg: Please give each node a desired_hostname, which is its FQDN (from which BBB wil be accessed)
-  when: desired_hostname is not defined
-
-- name: Dbg
-  debug:
-    var: desired_hostname
-
-- name: Installing Prerequisites
+- name: Install Prerequisites
   apt:
     update_cache: yes
     name:
@@ -27,61 +18,27 @@
     state: present
     force_apt_get: yes
 
-- name: Changing locale
+- name: Change locale
   locale_gen:
     name: en_US.UTF-8
     state: present
 
-- name: Updating
-  apt:
-    upgrade: safe
-
 - name: Configure firewall
   when: bigbluebutton_configure_firewall|bool
-  block:
-  - name: Opening tcp ports
-    ufw:
-      rule: allow
-      port: "{{ item }}"
-      proto: tcp
-    with_items:
-      - 443
-      - 80
-      - 7443
-      - 389
-      - 22
-      - 6556
+  include_tasks: firewall.yml
 
-  - name: Opening UDP ports
-    ufw:
-      rule: allow
-      port: 16384:32768
-      proto: udp
-      state: reloaded
-
-  - name: Enabling UFW
-    ufw:
-      state: enabled
-      default: deny
-
-- name: Checking we have multiverse enabled
-  apt_repository:
-    repo: deb http://archive.ubuntu.com/ubuntu xenial multiverse
-    state: present
-  tags:
-    - never
-
-- name: Message
+- name: Warn user
+  run_once: yes
   debug:
     msg: >
       Ready to run wget -qO- https://ubuntu.bigbluebutton.org/bbb-install.sh | bash -s -- -v xenial-220
       This takes around 15 mns
 
-- name: Running Install script
+- name: Launch install script
   shell: wget -qO- https://ubuntu.bigbluebutton.org/bbb-install.sh | bash -s -- -v xenial-220
   become: yes
 
-- name: Installing dependencies
+- name: Install dependencies
   apt:
     name:
       - apt-transport-https

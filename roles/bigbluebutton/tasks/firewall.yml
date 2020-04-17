@@ -1,0 +1,25 @@
+---
+- name: Open tcp ports
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  with_items:
+    - 443
+    - 80
+    - 7443
+    - 389
+    - 22
+    - 6556
+
+- name: Open UDP ports
+  ufw:
+    rule: allow
+    port: 16384:32768
+    proto: udp
+    state: reloaded
+
+- name: Enable UFW
+  ufw:
+    state: enabled
+    default: deny
