@@ -1,0 +1,17 @@
+#!/usr/bin/env ansible-playbook
+---
+- hosts: scalelite
+  remote_user: root
+  gather_facts: yes
+  tasks:
+  - name: Deploy certificates
+    import_role: { name: certificates }
+    tags: scalelite-certs
+
+  - name: Install Docker
+    import_role: { name: docker }
+    tags: [docker, scalelite-docker]
+
+  - name: Deploy scalelite load balancer
+    import_role: { name: scalelite }
+    tags: scalelite-app

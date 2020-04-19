@@ -1,0 +1,18 @@
+#!/usr/bin/env ansible-playbook
+---
+- hosts: greenlight
+  remote_user: root
+  gather_facts: yes
+  tasks:
+  - name: Deploy certificates
+    import_role: { name: certificates }
+    tags: greenlight-certs
+
+  - name: Install Docker
+    import_role: { name: docker }
+    tags: [docker, greenlight-docker]
+
+  - name: Deploy Greenlight
+    import_role: { name: greenlight }
+    tags: greenlight
+    tags: greenlight-app

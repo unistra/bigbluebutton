@@ -1,0 +1,2 @@
+---
+certificates_dir: "{{ role_path }}/vars"
