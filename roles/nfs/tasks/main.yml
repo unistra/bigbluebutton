@@ -10,7 +10,7 @@
 - name: Create directory
   file:
     state: directory
-    path: "{{ bbb_datadir }}"
+    path: "{{ scalelite_datadir }}"
 
 - name: Configure storage interface
   when: ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '16'
@@ -62,14 +62,14 @@
 - name: Ensure NFS volume is mounted
   mount:
     src: "{{ bbb_nfs_vol }}"
-    path: "{{ bbb_datadir }}"
+    path: "{{ scalelite_datadir }}"
     fstype: nfs
     opts: nfsvers=3,rw,auto,hard,intr
     state: mounted
 
 - name: Set rights on NFS directory
   file:
-    path: "{{ bbb_datadir }}"
+    path: "{{ scalelite_datadir }}"
     owner: "998"
     group: "998"
     recurse: yes
