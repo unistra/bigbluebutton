@@ -1,0 +1,81 @@
+---
+# If none of the variables ssl_certs_path and ssl_private are defined,
+# take default values based on os family.
+# Note: if theses variables are defined outside of the role, both variables
+# must be defined.
+- name: Include OS specific variables.
+  include_vars: defaults/{{ ansible_os_family }}.yml
+  when:
+    - ssl_certs_path is not defined
+    - ssl_private_path is not defined
+- name: Ensure both paths are defined.
+  assert:
+    that:
+      - ssl_certs_path is defined
+      - ssl_private_path is defined
+    msg: When declaring paths manually, be sure to declare both certs and private path.
+
+- name: Include certificates from vault files.
+  include_vars:
+    file: "{{ certificates_dir }}/{{ item }}.yml"
+    name: "{{ item }}"
+  with_items: "{{ certificates }}"
+
+- name: Ensure ca-certificates is installed.
+  package:
+    state: present
+    name: ca-certificates
+
+- name: Ensure certs and private directory exists.
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ ssl_certs_path }}"
+    - "{{ ssl_private_path }}"
+
+- name: Deploy private keys.
+  copy:
+    content: "{{ hostvars[inventory_hostname][item]['privkey'] }}"
+    dest: "{{ ssl_private_path + '/' + item + '.key' }}"
+    owner: root
+    group: root
+    mode: "0600"
+  with_items: "{{ certificates }}"
+
+- name: Deploy public keys.
+  copy:
+    content: "{{ hostvars[inventory_hostname][item]['cert'] }}"
+    dest: "{{ ssl_certs_path + '/' + item + '.crt' }}"
+    owner: root
+    group: root
+    mode: "0644"
+  with_items: "{{ certificates }}"
+
+- name: Deploy chain.
+  copy:
+    content: "{{ hostvars[inventory_hostname][item]['chain'] }}"
+    dest: "{{ ssl_certs_path + '/' + item + '.chcrt' }}"
+    owner: root
+    group: root
+    mode: "0644"
+  with_items: "{{ certificates }}"
+
+- name: Deploy concatenated certificate.
+  copy:
+    content: "{{ hostvars[inventory_hostname][item]['cert']
+                 + '\n'
+                 + hostvars[inventory_hostname][item]['chain'] }}"
+    dest: "{{ ssl_certs_path + '/' + item + '.pem' }}"
+    owner: root
+    group: root
+    mode: "0644"
+  with_items: "{{ certificates }}"
+
+- name: Set certificates deployment paths as fact.
+  set_fact:
+    "{{ item|regex_replace('[^a-zA-Z0-9_]', '_') + '_key_path' }}": "{{ ssl_private_path + '/' + item + '.key' }}"
+    "{{ item|regex_replace('[^a-zA-Z0-9_]', '_') + '_cert_path' }}": "{{ ssl_certs_path + '/' + item + '.crt' }}"
+    "{{ item|regex_replace('[^a-zA-Z0-9_]', '_') + '_chcrt_path' }}": "{{ ssl_certs_path + '/' + item + '.chcrt' }}"
+    "{{ item|regex_replace('[^a-zA-Z0-9_]', '_') + '_pem_path' }}": "{{ ssl_certs_path + '/' + item + '.pem' }}"
+  with_items: "{{ certificates }}"

@@ -1,0 +1,13 @@
+#!/usr/bin/env ansible-playbook
+---
+- hosts: bigbluebutton
+  remote_user: root
+  gather_facts: yes
+  tasks:
+  - name: Deploy certificates
+    import_role: { name: certificates }
+    tags: bigbluebutton-certs
+
+  - name: Deploy Big Blue Button
+    import_role: { name: bigbluebutton }
+    tags: bigbluebutton-app

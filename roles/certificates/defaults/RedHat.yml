@@ -1,0 +1,3 @@
+---
+ssl_certs_path: /etc/pki/tls/certs
+ssl_private_path: /etc/pki/tls/private

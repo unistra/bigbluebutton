@@ -1,0 +1,44 @@
+---
+- name: Ensure facts are gathered
+  when: ansible_distribution is not defined
+  setup:
+  tags: always
+
+- name: Install Docker and docker-compose
+  include_role:
+    name: geerlingguy.docker
+  tags:  docker-install
+
+- name: Install Ansible dependencies
+  tags: docker_ansible
+  block:
+  - name: CentoOS 7 | Install dependencies for installing docker Python module
+    when: ansible_distribution == 'CentOS' and ansible_distribution_major_version == '7'
+    yum:
+      name: [gcc, python-devel, python-pip]
+      enablerepo: epel
+
+  - name: Set pip version
+    set_fact:
+      pip_version: >-
+        {{ '3'
+           if ansible_distribution == 'Ubuntu'
+              and ansible_distribution_major_version|int >= 18
+           else '' }}
+
+  - name: Ubuntu | Install pip
+    when: ansible_distribution == 'Ubuntu'
+    apt:
+      name: ["python{{ pip_version }}-pip"]
+
+  - name: Upgrade pip (prevent errors when installing Python packages)
+    pip:
+      name: pip
+      state: latest
+      executable: "pip{{ pip_version }}"
+
+  - name: Install Python docker dependency
+    pip:
+      name: [docker, docker-compose]
+      state: present
+      executable: "pip{{ pip_version }}"

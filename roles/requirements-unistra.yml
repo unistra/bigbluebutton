@@ -1,0 +1,23 @@
+---
+- name: opennebula
+  scm: git
+  src: git@git.unistra.fr:di/ansible/roles/provisioning/opennebula.git
+  version: master
+
+- name: base-dnum
+  scm: git
+  src: git@git.unistra.fr:di/ansible/roles/base/base-dnum.git
+  version: master
+
+- name: certificates
+  scm: git
+  src: git@git.unistra.fr:di/ansible/roles/certificates.git
+  version: dev
+
+- name: geerlingguy.docker
+  version: 2.7.0
+
+- name: docker
+  scm: git
+  src: git@git.unistra.fr:di/ansible/roles/docker.git
+  version: master

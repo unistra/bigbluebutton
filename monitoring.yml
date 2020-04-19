@@ -1,0 +1,17 @@
+#!/usr/bin/env ansible-playbook
+---
+- hosts: bigbluebutton
+  remote_user: root
+  gather_facts: yes
+  tasks:
+  - name: Deploy BBB monitoring
+    import_role: { name: bigbluebutton, tasks_from: monitoring }
+    tags: monitoring
+
+- hosts: scalelite
+  remote_user: root
+  gather_facts: yes
+  tasks:
+  - name: Deploy Scalelite monitoring
+    import_role: { name: scalelite, tasks_from: monitoring }
+    tags: monitoring
