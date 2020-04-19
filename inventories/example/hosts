@@ -1,0 +1,11 @@
+[bigbluebutton]
+bbb-backend-1.mydomain.fr
+bbb-backend-2.mydomain.fr
+bbb-backend-3.mydomain.fr
+bbb-backend-4.mydomain.fr
+
+[scalelite]
+bbb-scalelite.mydomain.fr
+
+[greenlight]
+bbb-greenlight.mydomain.fr
