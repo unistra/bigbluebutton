@@ -10,6 +10,10 @@
 # vaults
 vault*
 
+# inventories
+inventories/*
+!inventories/example
+
 # third-party roles
 roles/base-dnum/
 roles/bunker/
