@@ -12,12 +12,12 @@ services:
     - 127.0.0.1:5000:80
     volumes:
     - "{{ greenlight_logdir }}:/usr/src/app/log"
-{% if greenlight_db_docker %}
+{% if greenlight_db_host == 'db' %}
     depends_on:
     - db
 {% endif %}
 
-{% if greenlight_db_docker %}
+{% if greenlight_db_host == 'db' %}
   db:
     #image: postgres:9.5
     image: postgres:12.1
@@ -28,6 +28,6 @@ services:
     - /var/lib/postgresql:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: "{{ greenlight_db_name }}"
-      POSTGRES_USER: "{{ greenlight_db_user }}"
-      POSTGRES_PASSWORD: "{{ greenlight_db_pass }}"
+      POSTGRES_USER: "{{ greenlight_db_username }}"
+      POSTGRES_PASSWORD: "{{ greenlight_db_password }}"
 {% endif %}

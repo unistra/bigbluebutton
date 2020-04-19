@@ -1,26 +1,69 @@
 ---
-# openssk rand -hex 64
-#greenlight_secret_key:
-
+# Additional Nginx server_name
 greenlight_aliases: []
 
+# Docker image to use
 greenlight_docker_image: bigbluebutton/greenlight:v2
 
-greenlight_db_docker: yes
-# only if greenlight_db_docker is false
-#greenlight_db_host:
-greenlight_db_user: greenlight
-greenlight_db_pass: greenlight
-greenlight_db_name: f26b21223835cd8a
+# This path is used in docker-compose and reference application logs
 greenlight_logdir: /var/log/greenlight
 
-greenlight_ldap_server: ''
-greenlight_ldap_port: ''
-greenlight_ldap_method: ''
-greenlight_ldap_uid: ''
-greenlight_ldap_base: ''
-greenlight_ldap_bind_dn: ''
-greenlight_ldap_bind_pwd: ''
-greenlight_ldap_role_file: ''
-
-greenlight_report_url: https://github.com/bigbluebutton/greenlight/issues/new
+#
+# Greenlight config
+# see https://github.com/bigbluebutton/greenlight/blob/master/sample.env for details
+#
+#greenlight_secret_key: MANDATORY
+#greenlight_bigbluebutton_endpoint: https://{{ groups.scalelite[0] }}/bigbluebutton/
+#greenlight_bigbluebutton_endpoint:
+#greenlight_bigbluebutton_secret: "{{ scalelite_loadbalancer_key }}"
+#greenlight_bigbluebutton_secret:
+greenlight_google_oauth2_id:
+greenlight_google_oauth2_secret:
+greenlight_google_oauth2_hd:
+greenlight_office365_key:
+greenlight_office365_secret:
+greenlight_office365_hd:
+greenlight_oauth2_redirect:
+greenlight_ldap_server:
+greenlight_ldap_port:
+greenlight_ldap_method:
+greenlight_ldap_uid:
+greenlight_ldap_base:
+greenlight_ldap_bind_dn:
+greenlight_ldap_password:
+greenlight_ldap_filter:
+greenlight_ldap_role_field:
+greenlight_allow_accounts: 'true'
+greenlight_recaptcha_site_key:
+greenlight_recaptcha_secret_key:
+greenlight_google_analytics_tracking_id:
+greenlight_smtp_server:
+greenlight_smtp_port:
+greenlight_smtp_domain:
+greenlight_smtp_username:
+greenlight_smtp_password:
+greenlight_smtp_auth:
+greenlight_smtp_starttls_auto:
+greenlight_smtp_sender:
+greenlight_relative_url_root: '/b'
+greenlight_room_features: mute-on-join,require-moderator-approval,anyone-can-start,all-join-moderator
+greenlight_pagination_number: 25
+greenlight_number_of_rows: 25
+greenlight_enable_google_calendar: 'false'
+greenlight_maintenance_mode: false
+greenlight_maintenance_window:
+greenlight_report_issue_url: https://github.com/bigbluebutton/greenlight/issues/new
+greenlight_rails_log_to_stdout: 'true'
+greenlight_log_driver:
+greenlight_log_address:
+greenlight_log_tag:
+greenlight_rails_log_remote_name:
+greenlight_rails_log_remote_port:
+greenlight_rails_log_remote_tag:
+greenlight_enable_ssl: 'true'
+greenlight_db_adapter: postgresql
+greenlight_db_host: 'db' # let this to use database from docker-compose
+greenlight_db_name: greenlight
+greenlight_db_username: greenlight
+greenlight_db_password: f26b21223835cd8a
+greenlight_default_registration: open
