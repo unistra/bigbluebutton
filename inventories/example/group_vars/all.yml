@@ -1,0 +1,76 @@
+---
+#
+# Certificates
+#
+certificates_dir: "{{ inventory_dir }}/group_vars/certs"
+certificates: [<CERT_NAME>]
+
+#
+# NFS mount point
+#
+scalelite_datadir: "/mnt/scalelite-recordings"
+
+#
+# Big Blue button
+#
+bigbluebutton_config:
+  webcamsOnlyForModerator: 'true'
+  muteOnStart: 'true'
+  allowModsToUnmuteUsers: 'true'
+
+bigbluebutton_camera_profiles:
+- id: low
+  name: Low quality
+  default: false
+  bitrate: 50
+- id: medium
+  name: Medium quality
+  default: true
+  bitrate: 100
+- id: high
+  name: High quality
+  default: false
+  bitrate: 200
+- id: hd
+  name: High definition
+  default: false
+  bitrate: 500
+
+#
+# Scalelite
+#
+# openssl rand -hex 64
+scalelite_secret_key: FIXIT
+# openssl rand -hex 32
+scalelite_loadbalancer_key: FIXIT
+
+scalelite_db_docker: yes
+#scalelite_db_docker: no
+#scalelite_db_host: bdd-scalelite.example.com
+#scalelite_db_user: scalelite
+#scalelite_db_pass: FIXIT
+#scalelite_db_name: scalelite
+
+#
+# Greenlight
+#
+# openssl rand -hex 64
+greenlight_secret_key: FIXIT
+# openssl rand -hex 64
+greenlight_secret_key: FIXIT
+
+greenlight_db_docker: yes
+#greenlight_db_docker: no
+#greenlight_db_host: bdd-greenlight.example.com
+#greenlight_db_user: greenlight
+#greenlight_db_pass: FIXIT
+#greenlight_db_name: greenlight
+
+greenlight_ldap_server: ldap.example.com
+greenlight_ldap_port: 389
+greenlight_ldap_method: plain
+greenlight_ldap_uid: uid
+greenlight_ldap_base: FIXIT
+greenlight_ldap_bind_dn: FIXIT
+greenlight_ldap_bind_pwd: FIXIT
+greenlight_ldap_filter: FIXIT
