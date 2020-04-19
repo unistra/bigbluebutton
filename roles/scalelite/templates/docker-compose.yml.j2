@@ -65,8 +65,8 @@ services:
     - 443:443
     volumes:
     - "{{ scalelite_datadir }}/var/bigbluebutton/published:/var/bigbluebutton/published:ro"
-    - /etc/ssl/certs/mega_wildcard.pem:/etc/nginx/ssl/live/{{ inventory_hostname }}/fullchain.pem
-    - /etc/ssl/private/mega_wildcard.key:/etc/nginx/ssl/live/{{ inventory_hostname }}/privkey.pem
+    - {{ lookup('vars', certificates.0 + '_pem_path') }}:/etc/nginx/ssl/live/{{ inventory_hostname }}/fullchain.pem
+    - {{ lookup('vars', certificates.0 + '_key_path') }}:/etc/nginx/ssl/live/{{ inventory_hostname }}/privkey.pem
     environment:
       <<: *ENVS
       NGINX_SSL: 'true'
