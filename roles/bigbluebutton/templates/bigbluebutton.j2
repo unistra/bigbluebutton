@@ -5,8 +5,8 @@ server {
      listen 443 ssl;
      listen [::]:443 ssl;
 
-     ssl_certificate /etc/ssl/certs/mega_wildcard.pem;
-     ssl_certificate_key /etc/ssl/private/mega_wildcard.key;
+     ssl_certificate {{ lookup('vars', certificates.0 + '_pem_path') }};
+     ssl_certificate_key {{ lookup('vars', certificates.0 + '_key_path') }};
      ssl_session_cache shared:SSL:10m;
      ssl_session_timeout 10m;
      ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
