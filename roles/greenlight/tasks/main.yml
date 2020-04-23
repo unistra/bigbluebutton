@@ -18,6 +18,8 @@
 
 - name: Launch docker-compose
   docker_compose:
+    build: yes
+    pull: yes
     project_src: /root/greenlight
 
 - name: Install nginx
