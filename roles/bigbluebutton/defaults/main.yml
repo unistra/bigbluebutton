@@ -2,3 +2,9 @@
 bigbluebutton_configure_firewall: no
 
 bigbluebutton_config: {}
+
+bigbluebutton_webrtc:
+  conference-media-specs.H264.tias_content: "1500000"
+  conference-media-specs.H264.as_content: "1500"
+  conference-media-specs.VP8.tias_content: "1500000"
+  conference-media-specs.VP8.as_content: "1500"
