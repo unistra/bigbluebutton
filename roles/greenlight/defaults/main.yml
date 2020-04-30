@@ -23,5 +23,7 @@ greenlight_ldap_bind_dn: ''
 greenlight_ldap_bind_pwd: ''
 greenlight_ldap_role_file: ''
 
+greenlight_allow_accounts: "true"
+
 greenlight_report_url: https://github.com/bigbluebutton/greenlight/issues/new
 greenlight_help_url: https://docs.bigbluebutton.org/greenlight/gl-overview.html
