@@ -53,6 +53,7 @@
   with_items: "{{ certificates }}"
 
 - name: Deploy chain.
+  when: "'chain' in hostvars[inventory_hostname][item]"
   copy:
     content: "{{ hostvars[inventory_hostname][item]['chain'] }}"
     dest: "{{ ssl_certs_path + '/' + item + '.chcrt' }}"
@@ -65,7 +66,7 @@
   copy:
     content: "{{ hostvars[inventory_hostname][item]['cert']
                  + '\n'
-                 + hostvars[inventory_hostname][item]['chain'] }}"
+                 + hostvars[inventory_hostname][item]['chain']|default('') }}"
     dest: "{{ ssl_certs_path + '/' + item + '.pem' }}"
     owner: root
     group: root
