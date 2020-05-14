@@ -78,14 +78,14 @@ Then edit the *hosts* file to put your hosts. There is one group per component:
 .. code::
 
   [bigbluebutton]
-  bbb-backend-1.example.com
-  bbb-backend-2.example.com
+  bbb-1.example.org
+  bbb-2.example.org
 
   [scalelite]
-  bbb-scalelite.example.com
+  bbb-scalelite.example.org
 
   [greenlight]
-  bbb-greenlight.example.com
+  bbb-greenlight.example.org
 
 Set the required variables in *inventories/<ENV>/group_vars/all.yml*:
 
@@ -110,20 +110,39 @@ Set the required variables in *inventories/<ENV>/group_vars/all.yml*:
 Manage SSL certificates
 -----------------------
 
-To deploy certificates, local role ``certificates`` is used. This role generate these files:
+The *certificates* role (inside the *roles/* directory of this repository) is in charge to
+deploy certificates on remote hosts and it also expose the paths where the certificate's files
+have been deployed as variables. These variables are used by other roles inside this
+repository to know paths to certificates files when configuring applications.
 
-  * */etc/ssl/private/<CERT_NAME>.key*: the private key of the certificate
-  * */etc/ssl/certs/<CERT_NAME>.crt*: the public key of the certificate
-  * */etc/ssl/certs/<CERT_NAME>.chain*: the chain of the certificate
-  * */etc/ssl/certs/<CERT_NAME>.pem*: the concatenation of the public key and and the chain, required by NGinx
+The role use a YAML file per certificate, containing parts of a x509 certificate:
+the private key (``privkey``), the certificate (``cert``) and the certificate chain for signed
+certificate (``chain``). As the private key is a sensible information (even more for
+wildcards!), this file need to be encrypted. A benefit of encrypting the file is that it
+can be put inside a version control system - even I would not recommend a public
+repository! - and put alongside the Ansible inventory.
 
-The role exposes these paths as variables which are used by ``bigbluebutton``, ``greenlight`` and ``scalelite`` roles.
+For telling the role where to find these YAML files and which certificate to deploy to
+each host, these variables must be set:
 
-To create the certificate file:
+* ``certificates_dir``: where to find YAML files (for example:
+  *inventories/<ENV>/group_vars/certs*)
+* ``certificates``: which certificate(s) to deploy (as list)
+
+These variables can be set either per host, in the case you have one certificate per host,
+or for all hosts (in *group_vars/all.yml*) in the case you have a wildcard.
+
+`More details (in French). <https://github.com/unistra/bigbluebutton/tree/master/roles/certificates>`_
+
+Create the certificate YAML file
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For generating this file, you must have access to the files of a valid x509 certificate.
+
 
 .. code::
 
-  $ ansible-vault create inventories/<ENV>/certs/<CERT_NAME>.yml --vault-id bbb@vault
+  $ ansible-vault create inventories/<ENV>/group_vars/certs/<CERT_NAME>.yml --vault-id bbb@vault
   privkey: |
     -----BEGIN PRIVATE KEY-----
     ...
@@ -139,14 +158,98 @@ To create the certificate file:
     ...
     -----END CERTIFICATE-----
 
-Inventory also need to be updated:
+From the name of the file (*<CERT_NAME>*) is deduced the value to pass to ``certificates``
+variable and the name of the dynamically generated variables containing paths of certificates
+files on remote hosts. The ``set_fact`` module is used to generate dynamic variables so the
+file name must not contains some character (like dots and dashes), except for the *.yml*
+extension. A safe way is to replace special characters by underscores.
+
+Exemple with self-signed certificate
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You will have warnings about the certificate in your browser as the certificate is not
+signed by a CA and for the exemple, a wildcard is generated.
 
 .. code::
 
-  $ vim inventories/<ENV>/group_vars/all.yml
+  # Generate self-signed certificate
+  $ mkdir certs/
+  $ openssl req -newkey rsa:2048 -nodes -keyout certs/example.org.key -x509 -out certs/example.org.crt -days 365 -subj "/CN=*.example.org"
+
+  # Generate file used by Ansible role
+  $ cat certs/bbb.example.org.key
+  -----BEGIN PRIVATE KEY-----
+  MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC9EKFF6FMPY2FG
+  WH9bRs3Ui4Mb2XcpJtV5PYo13He+KQcpJcw6k9kde8EFeHRo33NUbAUGj0sZOC1e
   ...
+
+  $ cat certs/bbb.example.org.crt
+  -----BEGIN CERTIFICATE REQUEST-----
+  MIICXzCCAUcCAQAwGjEYMBYGA1UEAwwPYmJiLmV4YW1wbGUub3JnMIIBIjANBgkq
+  hkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvRChRehTD2NhRlh/W0bN1IuDG9l3KSbV
+  ...
+
+  $ ansible-vault create inventories/<ENV>/group_vars/certs/wildcard_example_org.yml --vault-id bbb@vault
+  privkey: |
+    -----BEGIN PRIVATE KEY-----
+    MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC9EKFF6FMPY2FG
+    WH9bRs3Ui4Mb2XcpJtV5PYo13He+KQcpJcw6k9kde8EFeHRo33NUbAUGj0sZOC1e
+    ...
+
+  cert: |
+    -----BEGIN CERTIFICATE REQUEST-----
+    MIICXzCCAUcCAQAwGjEYMBYGA1UEAwwPYmJiLmV4YW1wbGUub3JnMIIBIjANBgkq
+    hkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvRChRehTD2NhRlh/W0bN1IuDG9l3KSbV
+    ...
+
+  # Tell Ansible where to find certificates and which one to use
+  $ vim inventories/<ENV>/group_vars/all.yml
+  certificates_dir: "{{ inventory_dir }}/group_vars/certs/
+  certificates: [wildcard_example_org]
+
+  # We don't need the certificate's files anymore
+  $ rm -rf certs/
+
+Exemple with a valid wildcard
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code::
+
+  # Generate YAML file containing parts of the certificates
+  $ ansible-vault create inventories/<ENV>/group_vars/certs/wildcard.yml --vault-id bbb@vault
+  ...
+
+  # Tell Ansible where to find certificates and which one to use
+  $ vim inventories/<ENV>/host_vars/all.yml
+  certificates_dir: "{{ inventory_dir }}/group_vars/certs/
+  certificates: [wildcard]
+
+Exemple with one certificate per host
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When there is one certificate per host, an encrypted YAML file need to be created for each
+host. We also need to tell Ansible which certificate to take for each host.
+
+.. code::
+
+  $ ansible-vault create inventories/<ENV>/group_vars/certs/bbb_1.yml --vault-id bbb@vault
+  ...
+  $ ansible-vault create inventories/<ENV>/group_vars/certs/bbb_2.yml --vault-id bbb@vault
+  ...
+  # Do the same for bbb-greenlight and bbb-scalelite hosts
+
+  $ vim inventories/<ENV>/host_vars/all.yml
   certificates_dir: "{{ inventory_dir }}/group_vars/certs
-  certificates: [<CERT_NAME>]
+
+  $ vim inventories/<ENV>/host_vars/bbb-1.example.org.yml
+  # reference the bbb_1.yml file in the directory defined by certificates_dir variable
+  certificates: [bbb_1]
+
+  $ vim inventories/<ENV>/host_vars/bbb-2.example.org.yml
+  # reference the bbb_2.yml file in the directory defined by certificates_dir variable
+  certificates: [bbb_2]
+
+  # Do the same for bbb-greenlight and bbb-scalelite hosts
 
 Usage
 =====
