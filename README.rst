@@ -44,7 +44,7 @@ To install ``geerlingguy.docker`` role:
 
 .. code::
 
-  $ ansible-galaxy install --roles-path roles geerlinguy.docker
+  $ ansible-galaxy install --roles-path roles geerlingguy.docker
 
 
 Create a vault
