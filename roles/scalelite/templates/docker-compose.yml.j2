@@ -9,13 +9,13 @@ services:
   database:
     container_name: scalelite_postgresql
     image: postgres
-    restart: unless-stopped
     networks: [scalelite]
     volumes:
     - /var/lib/postgresql:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: '{{ scalelite_db_user }}'
       POSTGRES_PASSWORD: '{{ scalelite_db_pass }}'
+    restart: unless-stopped
 {% endif %}
 
 {% if scalelite_redis_docker %}
@@ -25,9 +25,9 @@ services:
     networks: [scalelite]
     volumes:
     - /var/lib/redis:/data
-    restart: unless-stopped
     command:
     - '--appendonly yes'
+    restart: unless-stopped
 {% endif %}
 
   scalelite_api:
@@ -52,6 +52,7 @@ services:
       DATABASE_URL: "postgresql://{{ scalelite_db_user }}:{{ scalelite_db_pass }}@{{ 'database' if scalelite_db_docker else scalelite_db_host }}:5432/{{ scalelite_db_name }}"
       REDIS_URL: redis://{{ 'redis' if scalelite_redis_docker else scalelite_redis_host }}
       RAILS_LOG_TO_STDOUT: 'true'
+    restart: unless-stopped
 
   scalelite_nginx:
     container_name: scalelite-nginx
@@ -70,6 +71,7 @@ services:
     environment:
       <<: *ENVS
       NGINX_SSL: 'true'
+    restart: unless-stopped
 
   scalelite_poller:
     container_name: scalelite-poller
@@ -79,6 +81,7 @@ services:
     depends_on: *DEPENDS
 {% endif %}
     environment: *ENVS
+    restart: unless-stopped
 
   scalelite_recording_importer:
     container_name: scalelite-recording-importer
@@ -90,3 +93,4 @@ services:
     volumes:
     - "{{ scalelite_datadir }}/var/bigbluebutton:/var/bigbluebutton"
     environment: *ENVS
+    restart: unless-stopped

@@ -7,7 +7,6 @@ services:
     image: "{{ greenlight_docker_image }}"
     container_name: greenlight-v2
     env_file: .env
-    restart: unless-stopped
     ports:
     - 127.0.0.1:5000:80
     volumes:
@@ -16,12 +15,12 @@ services:
     depends_on:
     - db
 {% endif %}
+    restart: unless-stopped
 
 {% if greenlight_db_docker %}
   db:
     #image: postgres:9.5
     image: postgres:12.1
-    restart: on-failure
     ports:
     - 127.0.0.1:5432:5432
     volumes:
@@ -30,4 +29,5 @@ services:
       POSTGRES_DB: "{{ greenlight_db_name }}"
       POSTGRES_USER: "{{ greenlight_db_user }}"
       POSTGRES_PASSWORD: "{{ greenlight_db_pass }}"
+    restart: unless-stopped
 {% endif %}
